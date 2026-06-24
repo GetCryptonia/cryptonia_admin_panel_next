@@ -1,13 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--background);
+  --primary: var(--primary);
+  --secondary: var(--secondary);
+  --button-foreground: var(--button-foreground);
+  --success-color: var(--success-color);
+  --card-color: var(--card-color);
+  --disabled-color: var(--disabled-color);
+  --hint-text-color: var(--hint-text-color);
+}
+
+:root{
+  --background: #FFFFFF;
+  --primary: #FF5524;
+  --secondary: #00112A;
+  --button-foreground: #FFFFFF;
+  --success-color: #3FAC64;
+  --card-color: #F0F0F0;
+  --disabled-color: #BBBBBB;
+  --hint-text-color:#929292;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root{
+    --background: #000000;
+    --primary: #FF5524;
+    --secondary: #00112A;
+    --button-foreground: #FFFFFF;
+    --success-color: #3FAC64;
+    --card-color: #F0F0F0;
+    --disabled-color: #BBBBBB;
+    --hint-text-color:#929292;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-button-foreground: var(--button-foreground);
+  --color-success-color: var(--success-color);
+  --color-card-color: var(--card-color);
+  --color-disabled-color: var(--disabled-color);
+  --color-hint-text-color: var(--hint-text-color);
+  
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
