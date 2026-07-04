@@ -1,25 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: var(--background);
-  --primary: var(--primary);
-  --secondary: var(--secondary);
-  --button-foreground: var(--button-foreground);
-  --success-color: var(--success-color);
-  --card-color: var(--card-color);
-  --disabled-color: var(--disabled-color);
-  --hint-text-color: var(--hint-text-color);
-}
-
-:root{
   --background: #FFFFFF;
   --primary: #FF5524;
   --secondary: #00112A;
   --button-foreground: #FFFFFF;
   --success-color: #3FAC64;
-  --card-color: #F0F0F0;
+  --divider-color: #F0F0F0;
   --disabled-color: #BBBBBB;
   --hint-text-color:#929292;
+  --disabled-button-foreground: #F0F0F0;
+  --text-color: #0C0C0C;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,9 +20,11 @@
     --secondary: #00112A;
     --button-foreground: #FFFFFF;
     --success-color: #3FAC64;
-    --card-color: #F0F0F0;
+    --divider-color: #F0F0F0;
     --disabled-color: #BBBBBB;
     --hint-text-color:#929292;
+    --disabled-button-foreground: #F0F0F0;
+    --text-color: #FFFFFF;
   }
 }
 
@@ -42,23 +35,83 @@
   --color-secondary: var(--secondary);
   --color-button-foreground: var(--button-foreground);
   --color-success-color: var(--success-color);
-  --color-card-color: var(--card-color);
+  --color-divider-color: var(--divider-color);
   --color-disabled-color: var(--disabled-color);
   --color-hint-text-color: var(--hint-text-color);
-  
+  --color-text-color: var(--text-color);
+  --color-disabled-button-foreground: var(--disabled-button-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: var(--background);
+  color: var(--text-color);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  p {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  input {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 22px;
+    color: var(--text-color);
+    border: none;
+    outline: none;
+    background-color: var(--divider-color);
+    padding: 16px 16px;
+    border-radius: 12px;
+  }
+
+  input::placeholder {
+    color: var(--hint-text-color);
+  }
+
+  input:focus {
+    border: 1px solid var(--primary);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+.primary-button {
+  background-color: var(--primary);
+  color: var(--button-foreground);
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.primary-button:disabled {
+  background-color: var(--disabled-color);
+  color: var(--disabled-button-foreground);
+  cursor: not-allowed;
+}
+
+.text-link {
+  color: var(--primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
 }
