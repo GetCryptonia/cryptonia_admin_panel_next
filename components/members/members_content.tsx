@@ -20,8 +20,8 @@ import {
   removeMemberAction,
 } from "@/lib/features/members/actions";
 import type { Member, PaginatedMembers } from "@/lib/features/members/types";
-import { formatMemberRole, MEMBER_ROLE_OPTIONS } from "@/lib/features/members/utils";
-import { useEffect, useState, useTransition } from "react";
+import { MEMBER_ROLE_OPTIONS } from "@/lib/features/members/utils";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 type MembersContentProps = {
   initialData: PaginatedMembers;
@@ -29,13 +29,20 @@ type MembersContentProps = {
 
 export default function MembersContent({ initialData }: MembersContentProps) {
   const [members, setMembers] = useState(initialData.members);
+  const [totalMembers, setTotalMembers] = useState(initialData.totalMembers);
   const [currentPage, setCurrentPage] = useState(initialData.currentPage);
   const [totalPages, setTotalPages] = useState(initialData.totalPages);
   const [error, setError] = useState<string | null>(null);
   const [pendingMemberId, setPendingMemberId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const skipInitialFetchRef = useRef(true);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     startTransition(async () => {
       const result = await fetchMembersAction({ page: currentPage });
 
@@ -49,6 +56,7 @@ export default function MembersContent({ initialData }: MembersContentProps) {
       }
 
       setMembers(result.data.members);
+      setTotalMembers(result.data.totalMembers);
       setCurrentPage(result.data.currentPage);
       setTotalPages(result.data.totalPages);
       setError(null);
@@ -110,6 +118,7 @@ export default function MembersContent({ initialData }: MembersContentProps) {
       setMembers((current) =>
         current.filter((currentMember) => currentMember.id !== member.id),
       );
+      setTotalMembers((current) => Math.max(0, current - 1));
       setPendingMemberId(null);
       setError(null);
     });
@@ -122,10 +131,7 @@ export default function MembersContent({ initialData }: MembersContentProps) {
       <div className="flex flex-col gap-[24px] p-[24px] md:p-[48px]">
         <PageToolbar
           meta={
-            <CountBadge
-              count={initialData.totalMembers}
-              label="admin panel members"
-            />
+            <CountBadge count={totalMembers} label="admin panel members" />
           }
         />
 
@@ -169,16 +175,13 @@ export default function MembersContent({ initialData }: MembersContentProps) {
                         </option>
                       ))}
                     </FilterSelect>
-                    <p className="mt-[6px] text-xs text-hint-text-color">
-                      Current: {formatMemberRole(member.role)}
-                    </p>
                   </td>
                   <td className={TABLE_TD_CLASS}>
                     <button
                       type="button"
                       onClick={() => handleRemove(member)}
                       disabled={isPending && isRowPending}
-                      className="rounded-[10px] border border-divider-color px-[14px] py-[8px] text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:border-primary/30"
+                      className="rounded-[10px] border border-divider-color px-[14px] py-[8px] text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:border-primary/30 disabled:opacity-50"
                     >
                       {isPending && isRowPending ? "Removing..." : "Remove"}
                     </button>

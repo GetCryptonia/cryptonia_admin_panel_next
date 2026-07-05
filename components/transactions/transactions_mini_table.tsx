@@ -4,16 +4,29 @@ import {
   formatOrderType,
   getOrderStatusClass,
 } from "@/lib/features/transactions/utils";
-import { formatDateTime, formatNgnAmount } from "@/lib/format";
+import { formatDateTime, formatNgnAmount, formatUsdTokenAmount } from "@/lib/format";
 
 type TransactionsMiniTableProps = {
   transactions: Order[];
   emptyMessage?: string;
+  amountVariant?: "fiat" | "token";
 };
+
+function formatTransactionAmount(
+  transaction: Order,
+  amountVariant: "fiat" | "token",
+): string {
+  if (amountVariant === "token") {
+    return formatUsdTokenAmount(transaction.tokenAmount);
+  }
+
+  return formatNgnAmount(transaction.fiatAmount);
+}
 
 export default function TransactionsMiniTable({
   transactions,
   emptyMessage = "No transactions found.",
+  amountVariant = "fiat",
 }: TransactionsMiniTableProps) {
   if (transactions.length === 0) {
     return (
@@ -50,7 +63,7 @@ export default function TransactionsMiniTable({
                 {formatOrderType(transaction.type)}
               </td>
               <td className="px-[16px] py-[12px] font-medium">
-                {formatNgnAmount(transaction.fiatAmount)}
+                {formatTransactionAmount(transaction, amountVariant)}
               </td>
               <td className="px-[16px] py-[12px]">
                 <span

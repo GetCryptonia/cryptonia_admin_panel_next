@@ -1,33 +1,52 @@
 "use client";
 
+import StatCard from "@/components/shared/stat_card";
 import { redirectIfUnauthorized } from "@/lib/api/client_action_utils";
 import { reverseTransactionAction } from "@/lib/features/transactions/actions";
 import type { Order } from "@/lib/features/transactions/types";
 import {
   canCompleteTransaction,
   canReverseTransaction,
-  formatOrderStatus,
   formatOrderType,
-  getOrderStatusClass,
   getTransactionAccountName,
 } from "@/lib/features/transactions/utils";
-import { formatDateTime, formatNgnAmount } from "@/lib/format";
+import {
+  formatDateTime,
+  formatNgnAmount,
+  formatUsdTokenAmount,
+} from "@/lib/format";
+import {
+  Bank,
+  Calendar,
+  DocumentText,
+  Hashtag,
+  MoneyRecive,
+  Receipt,
+} from "iconsax-reactjs";
 import { useTransition } from "react";
 
 type TransactionDetailsPanelProps = {
   transaction: Order;
-  onTransactionUpdated: (order: Order) => void;
-  onComplete: () => void;
-  onError: (message: string) => void;
 };
 
-export default function TransactionDetailsPanel({
+export function TransactionDetailsFooterActions({
   transaction,
-  onTransactionUpdated,
   onComplete,
+  onTransactionUpdated,
   onError,
-}: TransactionDetailsPanelProps) {
+}: {
+  transaction: Order;
+  onComplete: () => void;
+  onTransactionUpdated: (order: Order) => void;
+  onError: (message: string) => void;
+}) {
   const [isPending, startTransition] = useTransition();
+  const showComplete = canCompleteTransaction(transaction);
+  const showReverse = canReverseTransaction(transaction);
+
+  if (!showComplete && !showReverse) {
+    return null;
+  }
 
   const handleReverse = () => {
     if (
@@ -55,56 +74,128 @@ export default function TransactionDetailsPanel({
   };
 
   return (
-    <div className="flex flex-col gap-[24px] border-t border-divider-color bg-divider-color/20 px-[20px] py-[24px]">
-      <div className="grid grid-cols-1 gap-[16px] md:grid-cols-2 xl:grid-cols-4">
-        <DetailItem label="Transaction ID" value={transaction._id} />
-        <DetailItem
-          label="Account"
-          value={getTransactionAccountName(transaction)}
+    <div className="flex flex-col gap-[12px]">
+      {showComplete ? (
+        <button
+          type="button"
+          onClick={onComplete}
+          className="primary-button w-full !rounded-[12px] !py-[14px] text-sm uppercase tracking-wide"
+        >
+          Mark completed
+        </button>
+      ) : null}
+      {showReverse ? (
+        <button
+          type="button"
+          onClick={handleReverse}
+          disabled={isPending}
+          className="w-full rounded-[12px] border border-divider-color px-[16px] py-[14px] text-sm font-semibold uppercase tracking-wide text-primary transition-colors hover:border-primary/30 disabled:opacity-50"
+        >
+          {isPending ? "Reversing..." : "Reverse order"}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export default function TransactionDetailsPanel({
+  transaction,
+}: TransactionDetailsPanelProps) {
+  const hasPaymentDetails =
+    transaction.receiverBank ||
+    transaction.receiverAccountNumber ||
+    transaction.receiverSessionId;
+
+  return (
+    <div className="flex flex-col gap-[28px] px-[20px] py-[24px] md:px-[24px]">
+      <div className="grid grid-cols-2 gap-[12px]">
+        <StatCard
+          compact
+          label="Token amount"
+          value={formatUsdTokenAmount(transaction.tokenAmount)}
+          icon={MoneyRecive}
+          iconBgClassName="bg-[#ECE8FF]"
+          iconColor="#7B61FF"
         />
-        <DetailItem label="Order type" value={formatOrderType(transaction.type)} />
-        <DetailItem
-          label="Status"
-          value={
-            <span
-              className={`rounded-full px-[10px] py-[4px] text-xs font-semibold ${getOrderStatusClass(transaction.status)}`}
-            >
-              {formatOrderStatus(transaction.status)}
-            </span>
-          }
+        <StatCard
+          compact
+          label="Fiat amount"
+          value={formatNgnAmount(transaction.fiatAmount)}
+          icon={Receipt}
+          iconBgClassName="bg-success-color/10"
+          iconColor="var(--success-color)"
         />
-        <DetailItem label="Token amount" value={String(transaction.tokenAmount)} />
-        <DetailItem label="Fiat amount" value={formatNgnAmount(transaction.fiatAmount)} />
-        <DetailItem label="Symbol" value={transaction.symbol ?? "—"} />
-        <DetailItem label="Date" value={formatDateTime(transaction.createdAt)} />
+        <StatCard
+          compact
+          label="Order type"
+          value={formatOrderType(transaction.type)}
+          icon={Hashtag}
+          iconBgClassName="bg-primary/10"
+          iconColor="var(--primary)"
+        />
+        <StatCard
+          compact
+          label="Date"
+          value={formatDateTime(transaction.createdAt)}
+          icon={Calendar}
+          iconBgClassName="bg-[#ECEEF6]"
+          iconColor="var(--secondary)"
+        />
       </div>
 
-      {(transaction.receiverBank ||
-        transaction.receiverAccountNumber ||
-        transaction.receiverSessionId) && (
-          <section className="flex flex-col gap-[12px]">
-            <h3 className="text-base font-semibold">Payment details</h3>
-            <div className="grid grid-cols-1 gap-[12px] md:grid-cols-2">
-              <DetailItem label="Bank" value={transaction.receiverBank ?? "—"} />
-              <DetailItem
-                label="Account number"
-                value={transaction.receiverAccountNumber ?? "—"}
-              />
-              <DetailItem
-                label="Session ID"
-                value={transaction.receiverSessionId ?? "—"}
-              />
-              <DetailItem
-                label="Payment ref"
-                value={transaction.paymentRefId ?? "—"}
-              />
-            </div>
-          </section>
-        )}
+      <section className="flex flex-col gap-[12px]">
+        <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2">
+          <DetailItem label="Transaction ID" value={transaction._id} mono />
+          <DetailItem
+            label="Account"
+            value={getTransactionAccountName(transaction)}
+          />
+          <DetailItem label="Symbol" value={transaction.symbol ?? "—"} />
+          {transaction.fee != null ? (
+            <DetailItem
+              label="Fee"
+              value={formatNgnAmount(transaction.fee)}
+            />
+          ) : null}
+        </div>
+      </section>
 
-      {(transaction.orderInfo || transaction.paymentInfo) && (
+      {hasPaymentDetails ? (
         <section className="flex flex-col gap-[12px]">
-          <h3 className="text-base font-semibold">Order breakdown</h3>
+          <SectionLabel
+            icon={Bank}
+            label="Payment details"
+            iconBgClassName="bg-[#ECE8FF]"
+            iconColor="#7B61FF"
+          />
+          <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2">
+            <DetailItem label="Bank" value={transaction.receiverBank ?? "—"} />
+            <DetailItem
+              label="Account number"
+              value={transaction.receiverAccountNumber ?? "—"}
+            />
+            <DetailItem
+              label="Session ID"
+              value={transaction.receiverSessionId ?? "—"}
+              mono
+            />
+            <DetailItem
+              label="Payment ref"
+              value={transaction.paymentRefId ?? "—"}
+              mono
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {transaction.orderInfo || transaction.paymentInfo ? (
+        <section className="flex flex-col gap-[12px]">
+          <SectionLabel
+            icon={DocumentText}
+            label="Order breakdown"
+            iconBgClassName="bg-primary/10"
+            iconColor="var(--primary)"
+          />
           {transaction.orderInfo ? (
             <JsonBlock title="Order info" data={transaction.orderInfo} />
           ) : null}
@@ -112,29 +203,34 @@ export default function TransactionDetailsPanel({
             <JsonBlock title="Payment info" data={transaction.paymentInfo} />
           ) : null}
         </section>
-      )}
+      ) : null}
+    </div>
+  );
+}
 
-      <div className="flex flex-row flex-wrap gap-[12px]">
-        {canCompleteTransaction(transaction) ? (
-          <button
-            type="button"
-            onClick={onComplete}
-            className="primary-button !rounded-[12px] !px-[16px] !py-[10px] text-xs uppercase tracking-wide"
-          >
-            Mark completed
-          </button>
-        ) : null}
-        {canReverseTransaction(transaction) ? (
-          <button
-            type="button"
-            onClick={handleReverse}
-            disabled={isPending}
-            className="rounded-[10px] border border-divider-color px-[16px] py-[10px] text-xs font-semibold uppercase tracking-wide"
-          >
-            {isPending ? "Reversing..." : "Reverse order"}
-          </button>
-        ) : null}
+function SectionLabel({
+  icon: Icon,
+  label,
+  iconBgClassName,
+  iconColor,
+}: {
+  icon: React.ComponentType<{
+    size?: number | string;
+    color?: string;
+    variant?: "Linear" | "Outline" | "Broken" | "Bold" | "Bulk" | "TwoTone";
+  }>;
+  label: string;
+  iconBgClassName: string;
+  iconColor: string;
+}) {
+  return (
+    <div className="flex flex-row items-center gap-[10px]">
+      <div
+        className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-full ${iconBgClassName}`}
+      >
+        <Icon size={16} color={iconColor} variant="Bulk" />
       </div>
+      <span className="text-sm font-semibold text-text-color">{label}</span>
     </div>
   );
 }
@@ -142,16 +238,22 @@ export default function TransactionDetailsPanel({
 function DetailItem({
   label,
   value,
+  mono = false,
 }: {
   label: string;
-  value: React.ReactNode;
+  value: string;
+  mono?: boolean;
 }) {
   return (
-    <div className="rounded-[12px] border border-divider-color bg-background p-[16px]">
+    <div className="rounded-[12px] border border-divider-color bg-background p-[14px]">
       <p className="text-xs font-semibold uppercase tracking-wide text-hint-text-color">
         {label}
       </p>
-      <div className="mt-[8px] break-all text-sm font-medium">{value}</div>
+      <p
+        className={`mt-[4px] break-all text-sm font-medium ${mono ? "font-mono text-xs" : ""}`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
@@ -164,7 +266,7 @@ function JsonBlock({
   data: Record<string, unknown>;
 }) {
   return (
-    <div className="rounded-[12px] border border-divider-color bg-background p-[16px]">
+    <div className="rounded-[12px] border border-divider-color bg-background p-[14px]">
       <p className="mb-[8px] text-xs font-semibold uppercase tracking-wide text-hint-text-color">
         {title}
       </p>

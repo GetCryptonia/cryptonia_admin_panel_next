@@ -5,7 +5,7 @@ import { toActionResult } from "@/lib/api/action_utils";
 import type { ActionResult } from "@/lib/api/types";
 import { NAV_HOME } from "@/lib/constants/routes";
 import * as service from "./service";
-import { clearToken, setToken } from "./session";
+import { clearToken, setAdminEmail, setToken } from "./session";
 
 export async function loginAction(
   email: string,
@@ -18,6 +18,7 @@ export async function loginAction(
   }
 
   await setToken(result.data);
+  await setAdminEmail(email);
   redirect(NAV_HOME);
 }
 

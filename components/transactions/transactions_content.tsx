@@ -1,7 +1,9 @@
 "use client";
 
 import CompleteTransactionModal from "@/components/transactions/complete_transaction_modal";
-import TransactionDetailsPanel from "@/components/transactions/transaction_details_panel";
+import TransactionDetailsPanel, {
+  TransactionDetailsFooterActions,
+} from "@/components/transactions/transaction_details_panel";
 import CountBadge from "@/components/shared/count_badge";
 import DataTableContainer, {
   TABLE_HEAD_CLASS,
@@ -10,6 +12,7 @@ import DataTableContainer, {
   TABLE_TD_CLASS,
   TABLE_TH_CLASS,
 } from "@/components/shared/data_table";
+import DetailDrawer from "@/components/shared/detail_drawer";
 import EmptyState from "@/components/shared/empty_state";
 import PageHeader from "@/components/shared/page_header";
 import PageToolbar from "@/components/shared/page_toolbar";
@@ -27,8 +30,8 @@ import {
   getOrderStatusClass,
   getTransactionAccountName,
 } from "@/lib/features/transactions/utils";
-import { formatDateTime, formatNgnAmount } from "@/lib/format";
-import { Fragment, useEffect, useState, useTransition } from "react";
+import { formatDateTime, formatUsdTokenAmount } from "@/lib/format";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 type TransactionsContentProps = {
   initialData: PaginatedTransactions;
@@ -38,16 +41,24 @@ export default function TransactionsContent({
   initialData,
 }: TransactionsContentProps) {
   const [transactions, setTransactions] = useState(initialData.transactions);
+  const [totalTransactions, setTotalTransactions] = useState(
+    initialData.totalTransactions,
+  );
   const [currentPage, setCurrentPage] = useState(initialData.currentPage);
   const [totalPages, setTotalPages] = useState(initialData.totalPages);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [expandedTransactionId, setExpandedTransactionId] = useState<
+  const [selectedTransactionId, setSelectedTransactionId] = useState<
     string | null
   >(null);
   const [completeTarget, setCompleteTarget] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const skipInitialFetchRef = useRef(true);
+
+  const selectedTransaction = transactions.find(
+    (transaction) => transaction._id === selectedTransactionId,
+  );
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -58,6 +69,11 @@ export default function TransactionsContent({
   }, [searchQuery]);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
+
     startTransition(async () => {
       const result = debouncedQuery
         ? await searchTransactionsAction(debouncedQuery, { page: currentPage })
@@ -73,6 +89,7 @@ export default function TransactionsContent({
       }
 
       setTransactions(result.data.transactions);
+      setTotalTransactions(result.data.totalTransactions);
       setCurrentPage(result.data.currentPage);
       setTotalPages(result.data.totalPages);
       setError(null);
@@ -87,6 +104,15 @@ export default function TransactionsContent({
     );
   };
 
+  const handleCloseDrawer = () => {
+    setSelectedTransactionId(null);
+  };
+
+  const handlePageChange = (page: number) => {
+    setSelectedTransactionId(null);
+    setCurrentPage(page);
+  };
+
   return (
     <div className="flex flex-col">
       <PageHeader title="Transactions" />
@@ -94,10 +120,7 @@ export default function TransactionsContent({
       <div className="flex flex-col gap-[24px] p-[24px] md:p-[48px]">
         <PageToolbar
           meta={
-            <CountBadge
-              count={initialData.totalTransactions}
-              label="total transactions"
-            />
+            <CountBadge count={totalTransactions} label="total transactions" />
           }
         >
           <SearchInput
@@ -105,7 +128,7 @@ export default function TransactionsContent({
             onChange={(value) => {
               setSearchQuery(value);
               setCurrentPage(1);
-              setExpandedTransactionId(null);
+              setSelectedTransactionId(null);
             }}
             placeholder="Search by transaction ID, session ID, or hash"
           />
@@ -122,7 +145,7 @@ export default function TransactionsContent({
             <tr>
               <th className={TABLE_TH_CLASS}>Account name</th>
               <th className={TABLE_TH_CLASS}>Transaction ID</th>
-              <th className={TABLE_TH_CLASS}>Amount (NGN)</th>
+              <th className={TABLE_TH_CLASS}>Amount</th>
               <th className={TABLE_TH_CLASS}>Status</th>
               <th className={TABLE_TH_CLASS}>Date</th>
               <th className={TABLE_TH_CLASS}>Order type</th>
@@ -130,55 +153,39 @@ export default function TransactionsContent({
           </thead>
           <tbody>
             {transactions.map((transaction) => {
-              const isExpanded = expandedTransactionId === transaction._id;
+              const isSelected = selectedTransactionId === transaction._id;
 
               return (
-                <Fragment key={transaction._id}>
-                  <tr
-                    onClick={() =>
-                      setExpandedTransactionId(
-                        isExpanded ? null : transaction._id,
-                      )
-                    }
-                    className={`${TABLE_ROW_CLASS} ${TABLE_ROW_INTERACTIVE_CLASS} ${isExpanded ? "bg-divider-color/20" : ""
-                      }`}
-                  >
-                    <td className={TABLE_TD_CLASS}>
-                      {getTransactionAccountName(transaction)}
-                    </td>
-                    <td className={`${TABLE_TD_CLASS} font-mono text-xs`}>
-                      {transaction._id}
-                    </td>
-                    <td className={`${TABLE_TD_CLASS} font-medium`}>
-                      {formatNgnAmount(transaction.fiatAmount)}
-                    </td>
-                    <td className={TABLE_TD_CLASS}>
-                      <span
-                        className={`rounded-full px-[10px] py-[4px] text-xs font-semibold ${getOrderStatusClass(transaction.status)}`}
-                      >
-                        {formatOrderStatus(transaction.status)}
-                      </span>
-                    </td>
-                    <td className={`${TABLE_TD_CLASS} text-hint-text-color`}>
-                      {formatDateTime(transaction.createdAt)}
-                    </td>
-                    <td className={TABLE_TD_CLASS}>
-                      {formatOrderType(transaction.type)}
-                    </td>
-                  </tr>
-                  {isExpanded ? (
-                    <tr>
-                      <td colSpan={6} className="p-0">
-                        <TransactionDetailsPanel
-                          transaction={transaction}
-                          onTransactionUpdated={handleTransactionUpdated}
-                          onComplete={() => setCompleteTarget(transaction)}
-                          onError={setError}
-                        />
-                      </td>
-                    </tr>
-                  ) : null}
-                </Fragment>
+                <tr
+                  key={transaction._id}
+                  onClick={() => setSelectedTransactionId(transaction._id)}
+                  className={`${TABLE_ROW_CLASS} ${TABLE_ROW_INTERACTIVE_CLASS} ${
+                    isSelected ? "bg-divider-color/30" : ""
+                  }`}
+                >
+                  <td className={TABLE_TD_CLASS}>
+                    {getTransactionAccountName(transaction)}
+                  </td>
+                  <td className={`${TABLE_TD_CLASS} font-mono text-xs`}>
+                    {transaction._id}
+                  </td>
+                  <td className={`${TABLE_TD_CLASS} font-medium`}>
+                    {formatUsdTokenAmount(transaction.tokenAmount)}
+                  </td>
+                  <td className={TABLE_TD_CLASS}>
+                    <span
+                      className={`rounded-full px-[10px] py-[4px] text-xs font-semibold ${getOrderStatusClass(transaction.status)}`}
+                    >
+                      {formatOrderStatus(transaction.status)}
+                    </span>
+                  </td>
+                  <td className={`${TABLE_TD_CLASS} text-hint-text-color`}>
+                    {formatDateTime(transaction.createdAt)}
+                  </td>
+                  <td className={TABLE_TD_CLASS}>
+                    {formatOrderType(transaction.type)}
+                  </td>
+                </tr>
               );
             })}
           </tbody>
@@ -191,13 +198,43 @@ export default function TransactionsContent({
         <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={(page) => {
-            setExpandedTransactionId(null);
-            setCurrentPage(page);
-          }}
+          onPageChange={handlePageChange}
           disabled={isPending}
         />
       </div>
+
+      <DetailDrawer
+        isOpen={selectedTransactionId !== null}
+        onClose={handleCloseDrawer}
+        title={
+          selectedTransaction
+            ? getTransactionAccountName(selectedTransaction)
+            : "Transaction details"
+        }
+        headerMeta={
+          selectedTransaction ? (
+            <span
+              className={`rounded-full px-[12px] py-[4px] text-xs font-semibold ${getOrderStatusClass(selectedTransaction.status)}`}
+            >
+              {formatOrderStatus(selectedTransaction.status)}
+            </span>
+          ) : null
+        }
+        footer={
+          selectedTransaction ? (
+            <TransactionDetailsFooterActions
+              transaction={selectedTransaction}
+              onComplete={() => setCompleteTarget(selectedTransaction)}
+              onTransactionUpdated={handleTransactionUpdated}
+              onError={setError}
+            />
+          ) : null
+        }
+      >
+        {selectedTransaction ? (
+          <TransactionDetailsPanel transaction={selectedTransaction} />
+        ) : null}
+      </DetailDrawer>
 
       {completeTarget ? (
         <CompleteTransactionModal

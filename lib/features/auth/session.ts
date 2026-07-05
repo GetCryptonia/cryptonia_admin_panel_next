@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 
 export const ADMIN_TOKEN_COOKIE = "admin_token";
+export const ADMIN_EMAIL_COOKIE = "admin_email";
 
 const cookieOptions = {
   httpOnly: true,
@@ -19,7 +20,18 @@ export async function setToken(token: string): Promise<void> {
   cookieStore.set(ADMIN_TOKEN_COOKIE, token, cookieOptions);
 }
 
+export async function setAdminEmail(email: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_EMAIL_COOKIE, email, cookieOptions);
+}
+
+export async function getAdminEmail(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get(ADMIN_EMAIL_COOKIE)?.value;
+}
+
 export async function clearToken(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_TOKEN_COOKIE);
+  cookieStore.delete(ADMIN_EMAIL_COOKIE);
 }

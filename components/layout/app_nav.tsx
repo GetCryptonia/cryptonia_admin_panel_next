@@ -3,11 +3,16 @@
 import DesktopSidebar from "./desktop_sidebar";
 import MobileDrawer from "./mobile_drawer";
 import { getPageTitle } from "./nav_item";
+import type { NavUserDisplay } from "@/lib/features/auth/utils";
 import { useState } from "react";
 import { HamburgerMenu } from "iconsax-reactjs";
 import { usePathname } from "next/navigation";
 
-export default function AppNav() {
+type AppNavProps = {
+  user: NavUserDisplay;
+};
+
+export default function AppNav({ user }: AppNavProps) {
   const pathname = usePathname();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -24,10 +29,11 @@ export default function AppNav() {
         </div>
         <div className="h-[1px] w-full bg-divider-color" />
       </div>
-      <DesktopSidebar />
+      <DesktopSidebar user={user} />
       <MobileDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+        user={user}
       />
     </div>
   );
