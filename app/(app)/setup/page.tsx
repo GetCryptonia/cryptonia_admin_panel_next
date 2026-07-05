@@ -1,5 +1,11 @@
-import FeaturePageSkeleton from "@/components/skeleton/feature_page_skeleton";
+import SetupContent from "@/components/setup/setup_content";
+import * as service from "@/lib/features/setup/service";
 
-export default function SetupPage() {
-  return <FeaturePageSkeleton title="Setup" variant="setup" />;
+export default async function SetupPage() {
+  const [rates, fees] = await Promise.all([
+    service.getRates(),
+    service.getTransactionFees(),
+  ]);
+
+  return <SetupContent initialRates={rates} initialFees={fees} />;
 }
