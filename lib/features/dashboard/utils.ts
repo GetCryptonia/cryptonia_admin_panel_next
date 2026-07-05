@@ -1,4 +1,4 @@
-import type { ChartDataPoint, KycLevelCount, VolumeData } from "./types";
+import type { ChartDataPoint, ChartSeriesPoint, KycLevelCount, VolumeData } from "./types";
 
 export type DashboardCurrency = "USD" | "NGN";
 
@@ -60,34 +60,62 @@ export function getCompletedKycCount(kycLevels: KycLevelCount[]): number {
     .reduce((sum, level) => sum + level.totalCount, 0);
 }
 
-export function buildChartSeries(
-  chartData: ChartDataPoint[],
-  bucketCount = 10,
-): number[] {
-  if (chartData.length === 0) {
-    return Array.from({ length: bucketCount }, () => 0);
+function getChartPointDate(point: ChartDataPoint): Date {
+  if (point.createdAt) {
+    return new Date(point.createdAt);
   }
 
-  const cumulative: number[] = [];
-  let runningTotal = 0;
+  if (/^[a-f0-9]{24}$/i.test(point._id)) {
+    return new Date(parseInt(point._id.slice(0, 8), 16) * 1000);
+  }
+
+  return new Date(0);
+}
+
+export function formatChartDateLabel(dateKey: string): string {
+  const date = new Date(`${dateKey}T00:00:00`);
+  const day = date.getDate();
+  const month = date.toLocaleString("en-GB", { month: "short" });
+  return `${day} ${month}`;
+}
+
+export function getChartPointAmount(
+  point: ChartDataPoint,
+  currency: DashboardCurrency,
+): number {
+  return currency === "USD" ? point.tokenAmount : point.fiatAmount;
+}
+
+export function buildChartPoints(
+  chartData: ChartDataPoint[],
+  currency: DashboardCurrency,
+): ChartSeriesPoint[] {
+  if (chartData.length === 0) {
+    return [];
+  }
+
+  const volumeByDay = new Map<string, number>();
 
   for (const point of chartData) {
-    runningTotal += point.fiatAmount;
-    cumulative.push(runningTotal);
+    const dateKey = getChartPointDate(point).toISOString().slice(0, 10);
+    const amount = getChartPointAmount(point, currency);
+    volumeByDay.set(dateKey, (volumeByDay.get(dateKey) ?? 0) + amount);
   }
 
-  if (cumulative.length <= bucketCount) {
-    return cumulative;
-  }
+  return [...volumeByDay.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([dateKey, volume]) => ({
+      dateKey,
+      label: formatChartDateLabel(dateKey),
+      volume,
+    }));
+}
 
-  const step = cumulative.length / bucketCount;
-  return Array.from({ length: bucketCount }, (_, index) => {
-    const dataIndex = Math.min(
-      Math.round((index + 1) * step) - 1,
-      cumulative.length - 1,
-    );
-    return cumulative[dataIndex] ?? 0;
-  });
+export function formatChartAxisLabel(
+  value: number,
+  currency: DashboardCurrency,
+): string {
+  return formatCurrencyAmount(value, currency);
 }
 
 export function getChartAxisLabels(maxValue: number, steps = 5): number[] {
@@ -95,6 +123,9 @@ export function getChartAxisLabels(maxValue: number, steps = 5): number[] {
     return [0, 200, 400, 600, 800, 1000];
   }
 
-  const interval = Math.ceil(maxValue / steps / 100) * 100 || 100;
+  const rawInterval = maxValue / steps;
+  const magnitude = 10 ** Math.floor(Math.log10(rawInterval));
+  const interval = Math.ceil(rawInterval / magnitude) * magnitude;
+
   return Array.from({ length: steps + 1 }, (_, index) => index * interval);
 }

@@ -12,6 +12,13 @@ export type ChartDataPoint = {
   tokenAmount: number;
   fiatAmount: number;
   type: string;
+  createdAt?: string;
+};
+
+export type ChartSeriesPoint = {
+  dateKey: string;
+  label: string;
+  volume: number;
 };
 
 export type DashboardAnalytics = {

@@ -43,7 +43,7 @@ export default function TodayMetricsPanel({
 
   return (
     <div className="flex h-full min-h-[320px] flex-col rounded-[16px] border border-divider-color bg-background p-[24px]">
-      <h3 className="text-base font-semibold">Today&apos;s Metric</h3>
+      <h3 className="text-base font-semibold">Period Metrics</h3>
 
       <div className="mt-[24px] flex flex-1 flex-col justify-center gap-[28px]">
         {metrics.map((metric) => {

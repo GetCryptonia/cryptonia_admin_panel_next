@@ -10,7 +10,7 @@ export default function DesktopSidebar() {
   const sections = [null, NavBarSection.TRADE, NavBarSection.MANAGEMENT];
 
   return (
-    <div className="max-w-[250px] w-full flex flex-row h-screen hidden md:flex">
+    <div className="hidden h-full w-full max-w-[250px] shrink-0 flex-row md:flex">
       <div className="flex flex-col flex-1">
         <div className="ml-[40px] mt-[48px] mb-[36px]">
           <Image src={assets.textLogo} alt="logo" width={115} height={18} />

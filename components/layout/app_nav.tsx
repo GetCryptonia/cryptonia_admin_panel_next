@@ -12,7 +12,7 @@ export default function AppNav() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
-    <>
+    <div className="flex w-full shrink-0 flex-col md:h-full md:w-[250px] md:max-w-[250px]">
       <div className="w-full md:hidden">
         <div className="flex h-[60px] w-full flex-row items-center p-[20px]">
           <HamburgerMenu
@@ -24,11 +24,11 @@ export default function AppNav() {
         </div>
         <div className="h-[1px] w-full bg-divider-color" />
       </div>
+      <DesktopSidebar />
       <MobileDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
       />
-      <DesktopSidebar />
-    </>
+    </div>
   );
 }
