@@ -1,5 +1,6 @@
 "use client";
 
+import { CloseCircle } from "iconsax-reactjs";
 import { useEffect } from "react";
 
 type DetailDrawerProps = {
@@ -57,14 +58,24 @@ export default function DetailDrawer({
         aria-labelledby="detail-drawer-title"
         className="relative flex h-full w-full flex-col bg-background shadow-[-8px_0_32px_rgba(12,12,12,0.12)] md:max-w-[560px] md:border-l md:border-divider-color"
       >
-        <div className="flex shrink-0 flex-row items-center justify-between gap-[12px] border-b border-divider-color px-[20px] py-[16px] md:px-[24px]">
-          <h2
-            id="detail-drawer-title"
-            className="min-w-0 truncate text-[18px] font-semibold capitalize md:text-[20px]"
+        <div className="flex shrink-0 flex-row items-start justify-between gap-[12px] border-b border-divider-color px-[20px] py-[16px] md:px-[24px]">
+          <div className="min-w-0 flex flex-1 flex-col gap-[8px]">
+            <h2
+              id="detail-drawer-title"
+              className="truncate text-[18px] font-semibold capitalize md:text-[20px]"
+            >
+              {title}
+            </h2>
+            {headerMeta ? <div className="w-fit shrink-0">{headerMeta}</div> : null}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex size-[36px] shrink-0 items-center justify-center rounded-[10px] transition-colors hover:bg-surface-color"
+            aria-label="Close drawer"
           >
-            {title}
-          </h2>
-          {headerMeta ? <div className="shrink-0">{headerMeta}</div> : null}
+            <CloseCircle size={24} color="var(--hint-text-color)" variant="Linear" />
+          </button>
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
