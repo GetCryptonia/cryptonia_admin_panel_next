@@ -1,5 +1,6 @@
 import {
   Buildings,
+  Gift,
   Home,
   Layer,
   MoneyTime,
@@ -32,6 +33,13 @@ export const navTabs: NavTab[] = [
     icon: Layer,
     section: null,
     key: NavTabType.SETUP,
+  },
+  {
+    label: "Rewards",
+    href: "/rewards",
+    icon: Gift,
+    section: null,
+    key: NavTabType.REWARDS,
   },
 
   //trade sections

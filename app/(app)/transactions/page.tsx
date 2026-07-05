@@ -1,12 +1,8 @@
-import FeaturePageSkeleton from "@/components/skeleton/feature_page_skeleton";
+import TransactionsContent from "@/components/transactions/transactions_content";
+import * as service from "@/lib/features/transactions/service";
 
-export default function TransactionsPage() {
-  return (
-    <FeaturePageSkeleton
-      title="Transactions"
-      variant="table"
-      tableColumns={7}
-      tableRows={10}
-    />
-  );
+export default async function TransactionsPage() {
+  const data = await service.getTransactions();
+
+  return <TransactionsContent initialData={data} />;
 }

@@ -15,8 +15,8 @@ export default function SkeletonTableLayout({
     <div className="flex flex-col gap-[20px]">
       {showFilters && (
         <div className="flex flex-col gap-[12px] sm:flex-row sm:items-center">
-          <Skeleton className="h-[44px] w-full max-w-[420px]" />
-          <Skeleton className="h-[44px] w-full max-w-[180px]" />
+          <Skeleton className="h-[40px] w-full max-w-[360px]" />
+          <Skeleton className="h-[40px] w-full max-w-[160px]" />
         </div>
       )}
 

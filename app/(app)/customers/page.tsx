@@ -1,12 +1,8 @@
-import FeaturePageSkeleton from "@/components/skeleton/feature_page_skeleton";
+import CustomersContent from "@/components/customers/customers_content";
+import * as service from "@/lib/features/customers/service";
 
-export default function CustomersPage() {
-  return (
-    <FeaturePageSkeleton
-      title="Customers"
-      variant="table"
-      tableColumns={7}
-      tableRows={10}
-    />
-  );
+export default async function CustomersPage() {
+  const data = await service.getCustomers();
+
+  return <CustomersContent initialData={data} />;
 }

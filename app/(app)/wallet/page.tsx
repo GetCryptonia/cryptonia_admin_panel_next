@@ -1,12 +1,8 @@
-import FeaturePageSkeleton from "@/components/skeleton/feature_page_skeleton";
+import WalletContent from "@/components/wallet/wallet_content";
+import * as service from "@/lib/features/wallets/service";
 
-export default function WalletPage() {
-  return (
-    <FeaturePageSkeleton
-      title="Wallet"
-      variant="table"
-      tableColumns={6}
-      tableRows={10}
-    />
-  );
+export default async function WalletPage() {
+  const data = await service.getWallets();
+
+  return <WalletContent initialData={data} />;
 }

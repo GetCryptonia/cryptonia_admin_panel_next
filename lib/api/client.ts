@@ -86,7 +86,16 @@ export async function apiRequest<T>(
     throw new ApiClientError(message, response.status);
   }
 
-  if (!response.ok || !json.success) {
+  if (!response.ok) {
+    const message = json.message || "Request failed";
+    const statusCode = getStatusCode(response, json);
+
+    handleUnauthorized(authenticated, statusCode, message);
+
+    throw new ApiClientError(message, statusCode, json.error);
+  }
+
+  if (!json.success && json.data === undefined) {
     const message = json.message || "Request failed";
     const statusCode = getStatusCode(response, json);
 

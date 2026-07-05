@@ -18,6 +18,7 @@ export type Customer = {
   role: string;
   currency: string;
   lastLogin: string | null;
+  createdAt?: string | null;
 };
 
 export type PaginatedCustomers = PaginatedResponse<

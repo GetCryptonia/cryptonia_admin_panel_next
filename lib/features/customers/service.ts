@@ -5,6 +5,7 @@ import type {
   CustomerDetails,
   PaginatedCustomers,
 } from "./types";
+import { normalizeCustomer } from "./utils";
 
 export async function getCustomers(
   params?: PageParams,
@@ -30,7 +31,10 @@ export async function getCustomerDetails(
 }
 
 export async function toggleCustomerBlock(customerId: string): Promise<Customer> {
-  return apiRequest<Customer>(`/admin/customers/${customerId}`, {
-    method: "PUT",
-  });
+  const customer = await apiRequest<Customer & { _id?: string }>(
+    `/admin-panel/customers/${customerId}`,
+    { method: "PUT" },
+  );
+
+  return normalizeCustomer(customer);
 }

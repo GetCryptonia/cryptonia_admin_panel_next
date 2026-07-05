@@ -1,12 +1,8 @@
-import FeaturePageSkeleton from "@/components/skeleton/feature_page_skeleton";
+import MembersContent from "@/components/members/members_content";
+import * as service from "@/lib/features/members/service";
 
-export default function MembersPage() {
-  return (
-    <FeaturePageSkeleton
-      title="Members"
-      variant="table"
-      tableColumns={4}
-      tableRows={6}
-    />
-  );
+export default async function MembersPage() {
+  const data = await service.getMembers();
+
+  return <MembersContent initialData={data} />;
 }
