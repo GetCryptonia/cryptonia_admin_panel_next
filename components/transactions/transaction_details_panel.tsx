@@ -1,6 +1,7 @@
 "use client";
 
 import StatCard from "@/components/shared/stat_card";
+import CopyableIdField from "@/components/shared/copyable_id_field";
 import { redirectIfUnauthorized } from "@/lib/api/client_action_utils";
 import { reverseTransactionAction } from "@/lib/features/transactions/actions";
 import type { Order } from "@/lib/features/transactions/types";
@@ -144,6 +145,7 @@ export default function TransactionDetailsPanel({
       </div>
 
       <section className="flex flex-col gap-[12px]">
+        <CopyableIdField value={transaction.userId} />
         <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-2">
           <DetailItem label="Transaction ID" value={transaction._id} mono />
           <DetailItem

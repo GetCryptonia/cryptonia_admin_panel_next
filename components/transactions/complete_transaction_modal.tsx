@@ -77,7 +77,7 @@ export default function CompleteTransactionModal({
               placeholder="Enter session ID or hash"
               disabled={isPending}
               required
-              className="!rounded-[10px] !border !border-divider-color !bg-background !py-[10px] !px-[14px] text-sm focus:!border-primary"
+              className="!rounded-[10px] !border !border-divider-color !bg-surface-color !py-[10px] !px-[14px] text-sm focus:!border-primary"
             />
           </div>
 

@@ -25,7 +25,7 @@ export default function SearchInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full !rounded-[10px] !border !border-divider-color !bg-background !py-[10px] !pl-[40px] !pr-[14px] text-sm focus:!border-primary"
+        className="w-full !rounded-[10px] !border !border-divider-color !bg-surface-color !py-[10px] !pl-[40px] !pr-[14px] text-sm focus:!border-primary"
       />
     </div>
   );

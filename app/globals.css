@@ -2,34 +2,37 @@
 
 :root {
   --background: #FFFFFF;
+  --surface-color: #F0F0F0;
   --primary: #FF5524;
   --secondary: #00112A;
   --button-foreground: #FFFFFF;
   --success-color: #3FAC64;
   --divider-color: #F0F0F0;
   --disabled-color: #BBBBBB;
-  --hint-text-color:#929292;
+  --hint-text-color: #929292;
   --disabled-button-foreground: #F0F0F0;
   --text-color: #0C0C0C;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root{
-    --background: #000000;
+  :root {
+    --background: #0C0C0C;
+    --surface-color: #1A1F27;
     --primary: #FF5524;
-    --secondary: #00112A;
+    --secondary: #EBF0F7;
     --button-foreground: #FFFFFF;
-    --success-color: #3FAC64;
-    --divider-color: #F0F0F0;
-    --disabled-color: #BBBBBB;
-    --hint-text-color:#929292;
-    --disabled-button-foreground: #F0F0F0;
-    --text-color: #FFFFFF;
+    --success-color: #4BBF72;
+    --divider-color: #2A3038;
+    --disabled-color: #3A4048;
+    --hint-text-color: #9CA3AF;
+    --disabled-button-foreground: #707880;
+    --text-color: #F5F5F5;
   }
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface-color: var(--surface-color);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
@@ -67,24 +70,45 @@ body {
     font-weight: 600;
   }
 
-  input {
+  input,
+  select,
+  textarea {
     font-size: 14px;
     font-weight: 400;
     line-height: 22px;
     color: var(--text-color);
     border: none;
     outline: none;
-    background-color: var(--divider-color);
+    background-color: var(--surface-color);
     padding: 16px 16px;
     border-radius: 12px;
   }
 
-  input::placeholder {
+  input::placeholder,
+  textarea::placeholder {
     color: var(--hint-text-color);
   }
 
-  input:focus {
+  input:focus,
+  select:focus,
+  textarea:focus {
     border: 1px solid var(--primary);
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-color);
+    caret-color: var(--text-color);
+    -webkit-box-shadow: 0 0 0 1000px var(--surface-color) inset;
+    box-shadow: 0 0 0 1000px var(--surface-color) inset;
+    transition: background-color 5000s ease-in-out 0s;
   }
 }
 

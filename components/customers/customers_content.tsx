@@ -271,6 +271,7 @@ export default function CustomersContent({ initialData }: CustomersContentProps)
           selectedCustomerId &&
           detailsByCustomerId[selectedCustomerId] ? (
           <CustomerDetailsPanel
+            customerId={selectedCustomer.id}
             details={detailsByCustomerId[selectedCustomerId]}
           />
         ) : null}

@@ -145,7 +145,7 @@ export default function CreateRewardModal({
                   }
                   disabled={isPending}
                   required
-                  className="!rounded-[10px] !border !border-divider-color !bg-background !py-[10px] !px-[14px] text-sm focus:!border-primary"
+                  className="!rounded-[10px] !border !border-divider-color !bg-surface-color !py-[10px] !px-[14px] text-sm focus:!border-primary"
                 />
               </div>
               <div className="flex flex-col gap-[8px]">
@@ -161,7 +161,7 @@ export default function CreateRewardModal({
                   }
                   disabled={isPending}
                   required
-                  className="!rounded-[10px] !border !border-divider-color !bg-background !py-[10px] !px-[14px] text-sm focus:!border-primary"
+                  className="!rounded-[10px] !border !border-divider-color !bg-surface-color !py-[10px] !px-[14px] text-sm focus:!border-primary"
                 />
               </div>
             </>

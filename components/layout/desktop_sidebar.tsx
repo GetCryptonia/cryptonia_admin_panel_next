@@ -1,12 +1,11 @@
 "use client";
 
+import BrandLogo from "@/components/logos/brand_logo";
 import { navTabs } from "@/lib/config/navigation";
 import type { NavUserDisplay } from "@/lib/features/auth/utils";
 import { NavBarSection } from "@/lib/types/nav_tab";
 import NavTabItem from "./nav_item";
 import NavUserFooter from "./nav_user_footer";
-import Image from "next/image";
-import { assets } from "@/lib/utils/assets";
 
 type DesktopSidebarProps = {
   user: NavUserDisplay;
@@ -20,7 +19,7 @@ export default function DesktopSidebar({ user }: DesktopSidebarProps) {
       <div className="flex h-full flex-1 flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="ml-[40px] mt-[48px] mb-[36px]">
-            <Image src={assets.textLogo} alt="logo" width={115} height={18} />
+            <BrandLogo variant="text" />
           </div>
           {sections.map((section) => (
             <div key={String(section)} className="flex flex-col gap-[10px]">

@@ -3,8 +3,8 @@ import Skeleton from "./skeleton";
 export default function BalanceSkeleton() {
   return (
     <div className="flex flex-col">
-      <div className="border-b border-divider-color px-[24px] py-[20px] md:px-[48px] md:py-[24px]">
-        <Skeleton className="hidden h-[28px] w-[120px] md:block" />
+      <div className="hidden border-b border-divider-color px-[24px] py-[20px] md:block md:px-[48px] md:py-[24px]">
+        <Skeleton className="h-[28px] w-[120px]" />
       </div>
 
       <div className="flex flex-col gap-[32px] p-[24px] md:p-[48px]">

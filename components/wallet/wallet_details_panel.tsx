@@ -1,6 +1,7 @@
 "use client";
 
 import TransactionsMiniTable from "@/components/transactions/transactions_mini_table";
+import CopyableIdField from "@/components/shared/copyable_id_field";
 import StatCard from "@/components/shared/stat_card";
 import type { WalletDetails } from "@/lib/features/wallets/types";
 import {
@@ -16,25 +17,12 @@ import {
   Profile2User,
   Wallet2,
 } from "iconsax-reactjs";
-import { useState } from "react";
 
 type WalletDetailsPanelProps = {
   details: WalletDetails;
 };
 
 export default function WalletDetailsPanel({ details }: WalletDetailsPanelProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyUserId = async () => {
-    try {
-      await navigator.clipboard.writeText(details.user.id);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  };
-
   const fullName =
     `${details.user.firstName ?? ""} ${details.user.lastName ?? ""}`.trim() ||
     "—";
@@ -92,23 +80,7 @@ export default function WalletDetailsPanel({ details }: WalletDetailsPanelProps)
             label="Wallet created"
             value={formatDate(details.wallet.createdAt)}
           />
-          <div className="rounded-[12px] border border-divider-color bg-background p-[14px]">
-            <p className="text-xs font-semibold uppercase tracking-wide text-hint-text-color">
-              User ID
-            </p>
-            <div className="mt-[4px] flex flex-row flex-wrap items-center gap-[10px]">
-              <span className="min-w-0 flex-1 break-all font-mono text-xs">
-                {details.user.id}
-              </span>
-              <button
-                type="button"
-                onClick={handleCopyUserId}
-                className="shrink-0 rounded-[10px] border border-primary/30 px-[12px] py-[6px] text-xs font-semibold uppercase tracking-wide text-primary transition-colors hover:border-primary"
-              >
-                {copied ? "Copied" : "Copy"}
-              </button>
-            </div>
-          </div>
+          <CopyableIdField value={details.user.id} />
         </div>
       </section>
 

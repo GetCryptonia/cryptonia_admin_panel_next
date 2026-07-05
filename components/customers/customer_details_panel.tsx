@@ -1,6 +1,7 @@
 "use client";
 
 import TransactionsMiniTable from "@/components/transactions/transactions_mini_table";
+import CopyableIdField from "@/components/shared/copyable_id_field";
 import StatCard from "@/components/shared/stat_card";
 import { redirectIfUnauthorized } from "@/lib/api/client_action_utils";
 import { toggleCustomerBlockAction } from "@/lib/features/customers/actions";
@@ -18,6 +19,7 @@ import {
 import { useTransition } from "react";
 
 type CustomerDetailsPanelProps = {
+  customerId: string;
   details: CustomerDetails;
 };
 
@@ -69,10 +71,13 @@ export function CustomerDetailsBlockAction({
 }
 
 export default function CustomerDetailsPanel({
+  customerId,
   details,
 }: CustomerDetailsPanelProps) {
   return (
     <div className="flex flex-col gap-[28px] px-[20px] py-[24px] md:px-[24px]">
+      <CopyableIdField value={customerId} />
+
       <div className="grid grid-cols-2 gap-[12px]">
         <StatCard
           compact

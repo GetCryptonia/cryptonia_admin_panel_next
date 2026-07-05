@@ -109,7 +109,7 @@ export default function FeeFormModal({
                   }))
                 }
                 disabled={isPending}
-                className="rounded-[12px] border-none bg-divider-color px-[16px] py-[16px] text-sm outline-none focus:border focus:border-primary"
+                className="rounded-[12px] border-none bg-surface-color px-[16px] py-[16px] text-sm outline-none focus:border focus:border-primary"
               >
                 <option value="stablecoin">Stablecoin</option>
                 <option value="fiat">Fiat</option>
@@ -150,7 +150,7 @@ export default function FeeFormModal({
                   }))
                 }
                 disabled={isPending}
-                className="rounded-[12px] border-none bg-divider-color px-[16px] py-[16px] text-sm outline-none focus:border focus:border-primary"
+                className="rounded-[12px] border-none bg-surface-color px-[16px] py-[16px] text-sm outline-none focus:border focus:border-primary"
               >
                 <option value="deposit">Deposit</option>
                 <option value="withdraw">Withdraw</option>
@@ -170,7 +170,7 @@ export default function FeeFormModal({
                   }))
                 }
                 disabled={isPending}
-                className="rounded-[12px] border-none bg-divider-color px-[16px] py-[16px] text-sm outline-none focus:border focus:border-primary"
+                className="rounded-[12px] border-none bg-surface-color px-[16px] py-[16px] text-sm outline-none focus:border focus:border-primary"
               >
                 <option value="fixed">Fixed</option>
                 <option value="percentage">Percentage</option>
