@@ -1,5 +1,8 @@
-import FeaturePageSkeleton from "@/components/skeleton/feature_page_skeleton";
+import BalanceContent from "@/components/balance/balance_content";
+import * as service from "@/lib/features/balances/service";
 
-export default function BalancePage() {
-  return <FeaturePageSkeleton title="Balance" variant="cards" />;
+export default async function BalancePage() {
+  const data = await service.getBalances();
+
+  return <BalanceContent initialData={data} />;
 }

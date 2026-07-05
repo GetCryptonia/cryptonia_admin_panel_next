@@ -5,6 +5,7 @@ import DashboardTopBar from "@/components/dashboard/dashboard_top_bar";
 import MetricCard from "@/components/dashboard/metric_card";
 import TodayMetricsPanel from "@/components/dashboard/today_metrics_panel";
 import VolumeChart from "@/components/dashboard/volume_chart";
+import { redirectIfUnauthorized } from "@/lib/api/client_action_utils";
 import { fetchDashboardDataAction } from "@/lib/features/dashboard/actions";
 import { getDefaultDateRange } from "@/lib/features/dashboard/date_range";
 import type { DashboardData } from "@/lib/features/dashboard/types";
@@ -28,13 +29,11 @@ import { useCallback, useMemo, useState, useTransition } from "react";
 type MetricTab = "users" | "transactions";
 
 type DashboardContentProps = {
-  initialData: DashboardData | null;
-  initialError?: string;
+  initialData: DashboardData;
 };
 
 export default function DashboardContent({
   initialData,
-  initialError,
 }: DashboardContentProps) {
   const defaultRange = getDefaultDateRange();
   const [currency, setCurrency] = useState<DashboardCurrency>("USD");
@@ -42,13 +41,17 @@ export default function DashboardContent({
   const [startDate, setStartDate] = useState(defaultRange.startDate);
   const [endDate, setEndDate] = useState(defaultRange.endDate);
   const [dashboardData, setDashboardData] = useState(initialData);
-  const [error, setError] = useState(initialError ?? null);
+  const [error, setError] = useState<string | null>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const loadDashboardData = useCallback((range: DateRangeParams) => {
     startTransition(async () => {
       const result = await fetchDashboardDataAction(range);
+
+      if (redirectIfUnauthorized(result)) {
+        return;
+      }
 
       if (!result.ok) {
         setError(result.message);

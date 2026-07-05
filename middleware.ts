@@ -1,21 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { NAV_HOME } from "@/lib/constants/routes";
 
 const PUBLIC_PATHS = ["/auth/login"];
+const ADMIN_TOKEN_COOKIE = "admin_token";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("admin_token")?.value;
+  const token = request.cookies.get(ADMIN_TOKEN_COOKIE)?.value;
 
   const isPublicPath = PUBLIC_PATHS.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 
   if (isPublicPath) {
-    if (token && pathname.startsWith("/auth/login")) {
-      return NextResponse.redirect(new URL(NAV_HOME, request.url));
+    if (pathname.startsWith("/auth/login") && token) {
+      const response = NextResponse.next();
+      response.cookies.delete(ADMIN_TOKEN_COOKIE);
+      return response;
     }
+
     return NextResponse.next();
   }
 

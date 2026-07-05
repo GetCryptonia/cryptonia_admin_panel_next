@@ -1,4 +1,6 @@
+import { redirectToLogin } from "@/lib/features/auth/redirect";
 import { getToken } from "@/lib/features/auth/session";
+import { isUnauthorized } from "@/lib/api/unauthorized";
 import { ApiClientError } from "./errors";
 import type { ApiResponse } from "./types";
 
@@ -31,6 +33,20 @@ function buildUrl(path: string, query?: ApiRequestOptions["query"]): string {
   return url.toString();
 }
 
+function getStatusCode(
+  response: Response,
+  json?: ApiResponse<unknown>,
+): number {
+  const statusCode = json?.statusCode ?? response.status;
+  return typeof statusCode === "number" ? statusCode : Number(statusCode);
+}
+
+function handleUnauthorized(authenticated: boolean, statusCode: number, message: string): void {
+  if (authenticated && isUnauthorized(statusCode, message)) {
+    redirectToLogin();
+  }
+}
+
 export async function apiRequest<T>(
   path: string,
   options: ApiRequestOptions = {},
@@ -48,7 +64,7 @@ export async function apiRequest<T>(
   if (authenticated) {
     const token = await getToken();
     if (!token) {
-      throw new ApiClientError("Not authenticated", 401);
+      redirectToLogin();
     }
     headers.Authorization = `Bearer ${token}`;
   }
@@ -65,15 +81,18 @@ export async function apiRequest<T>(
   try {
     json = (await response.json()) as ApiResponse<T>;
   } catch {
-    throw new ApiClientError("Invalid response from server", response.status);
+    const message = "Invalid response from server";
+    handleUnauthorized(authenticated, response.status, message);
+    throw new ApiClientError(message, response.status);
   }
 
   if (!response.ok || !json.success) {
-    throw new ApiClientError(
-      json.message || "Request failed",
-      json.statusCode ?? response.status,
-      json.error,
-    );
+    const message = json.message || "Request failed";
+    const statusCode = getStatusCode(response, json);
+
+    handleUnauthorized(authenticated, statusCode, message);
+
+    throw new ApiClientError(message, statusCode, json.error);
   }
 
   return json.data as T;

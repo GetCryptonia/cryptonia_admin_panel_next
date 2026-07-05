@@ -1,12 +1,12 @@
 export type FiatBalance = {
   currency: string;
-  balance: number;
+  balance: string | number;
   provider: string;
 };
 
 export type CryptoBalance = {
   symbol: string;
-  balance: number;
+  balance: string | number;
   provider: string;
 };
 
