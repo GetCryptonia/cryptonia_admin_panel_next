@@ -6,6 +6,7 @@ export const assets = {
 
   //flags
   flagUS: "/flags/us.png",
+  flagNG: "/flags/ng.png",
   flagEU: "/flags/eu.png",
   flagUk: "/flags/uk.png",
 
