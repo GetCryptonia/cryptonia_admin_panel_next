@@ -12,6 +12,7 @@ import type { DashboardData } from "@/lib/features/dashboard/types";
 import {
   formatCurrencyAmount,
   getCompletedKycCount,
+  getOrderDistributionAmount,
   selectVolumeData,
   type DashboardCurrency,
 } from "@/lib/features/dashboard/utils";
@@ -84,15 +85,25 @@ export default function DashboardContent({
 
   const chartData = dashboardData?.analytics.chartData ?? [];
   const userActivity = dashboardData?.userActivity ?? null;
-  const orderDistribution = dashboardData?.orderDistribution ?? null;
+  const orderDistribution = useMemo(() => {
+    const items = dashboardData?.orderDistribution ?? [];
+    return [...items].sort(
+      (a, b) =>
+        getOrderDistributionAmount(b, currency) -
+        getOrderDistributionAmount(a, currency),
+    );
+  }, [dashboardData?.orderDistribution, currency]);
 
   const totalDistributionVolume =
-    orderDistribution?.reduce((sum, item) => sum + item.totalFiatVolume, 0) ?? 0;
+    orderDistribution.reduce(
+      (sum, item) => sum + getOrderDistributionAmount(item, currency),
+      0,
+    );
   const totalDistributionTransactions =
-    orderDistribution?.reduce(
+    orderDistribution.reduce(
       (sum, item) => sum + item.numberOfTransactions,
       0,
-    ) ?? 0;
+    );
 
   return (
     <div className="flex flex-col">
@@ -218,7 +229,6 @@ export default function DashboardContent({
         )}
 
         {metricTab === "transactions" &&
-          orderDistribution &&
           orderDistribution.length > 0 && (
             <div className="rounded-[16px] border border-divider-color bg-background p-[24px]">
               <div className="mb-[16px] flex flex-row items-center justify-between gap-[12px]">
@@ -242,7 +252,10 @@ export default function DashboardContent({
                       {item.numberOfTransactions.toLocaleString()} transactions
                     </p>
                     <p className="mt-[8px] text-sm font-medium">
-                      {formatCurrencyAmount(item.totalFiatVolume, currency)}
+                      {formatCurrencyAmount(
+                        getOrderDistributionAmount(item, currency),
+                        currency,
+                      )}
                     </p>
                   </div>
                 ))}

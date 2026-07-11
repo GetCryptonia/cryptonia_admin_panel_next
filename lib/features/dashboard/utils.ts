@@ -1,4 +1,10 @@
-import type { ChartDataPoint, ChartSeriesPoint, KycLevelCount, VolumeData } from "./types";
+import type {
+  ChartDataPoint,
+  ChartSeriesPoint,
+  KycLevelCount,
+  OrderDistributionItem,
+  VolumeData,
+} from "./types";
 
 export type DashboardCurrency = "USD" | "NGN";
 
@@ -25,6 +31,13 @@ export function selectVolumeData(
 
   const index = currency === "USD" ? 0 : 1;
   return volumeData[index] ?? volumeData[0] ?? null;
+}
+
+export function getOrderDistributionAmount(
+  item: OrderDistributionItem,
+  currency: DashboardCurrency,
+): number {
+  return currency === "USD" ? item.totalTokenVolume : item.totalFiatVolume;
 }
 
 export function formatCurrencyAmount(
