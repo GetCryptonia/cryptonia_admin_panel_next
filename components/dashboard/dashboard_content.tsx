@@ -13,6 +13,7 @@ import {
   formatCurrencyAmount,
   getCompletedKycCount,
   getOrderDistributionAmount,
+  getVolumeAmount,
   selectVolumeData,
   type DashboardCurrency,
 } from "@/lib/features/dashboard/utils";
@@ -79,8 +80,8 @@ export default function DashboardContent({
   };
 
   const volumeData = useMemo(
-    () => selectVolumeData(dashboardData?.analytics.volumeData, currency),
-    [dashboardData?.analytics.volumeData, currency],
+    () => selectVolumeData(dashboardData?.analytics.volumeData),
+    [dashboardData?.analytics.volumeData],
   );
 
   const chartData = dashboardData?.analytics.chartData ?? [];
@@ -153,8 +154,8 @@ export default function DashboardContent({
                 type="button"
                 onClick={() => setMetricTab(tab.key)}
                 className={`rounded-full border px-[18px] py-[8px] text-xs font-semibold uppercase tracking-wide transition-colors ${isActive
-                    ? "border-primary text-text-color"
-                    : "border-divider-color text-hint-text-color"
+                  ? "border-primary text-text-color"
+                  : "border-divider-color text-hint-text-color"
                   }`}
               >
                 {tab.label}
@@ -207,7 +208,9 @@ export default function DashboardContent({
             <MetricCard
               label="Total Volume"
               value={formatCurrencyAmount(
-                volumeData?.totalVolume ?? totalDistributionVolume,
+                volumeData
+                  ? getVolumeAmount(volumeData, currency)
+                  : totalDistributionVolume,
                 currency,
               )}
               icon={Chart}

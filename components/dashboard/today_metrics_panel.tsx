@@ -3,6 +3,7 @@
 import {
   formatCount,
   formatCurrencyAmount,
+  getVolumeAmount,
   type DashboardCurrency,
 } from "@/lib/features/dashboard/utils";
 import type { VolumeData } from "@/lib/features/dashboard/types";
@@ -21,7 +22,7 @@ export default function TodayMetricsPanel({
     {
       label: "Total Volume Traded",
       value: volumeData
-        ? formatCurrencyAmount(volumeData.totalVolume, currency)
+        ? formatCurrencyAmount(getVolumeAmount(volumeData, currency), currency)
         : formatCurrencyAmount(0, currency),
       icon: Chart2,
     },

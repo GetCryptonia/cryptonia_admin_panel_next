@@ -12,25 +12,17 @@ const COMPLETED_KYC_LEVELS = new Set(["BVN", "NIN", "ADDRESS"]);
 
 export function selectVolumeData(
   volumeData: VolumeData[] | undefined,
-  currency: DashboardCurrency,
 ): VolumeData | null {
-  if (!volumeData?.length) {
-    return null;
-  }
+  return volumeData?.[0] ?? null;
+}
 
-  const matched = volumeData.find(
-    (entry) => entry.currency?.toUpperCase() === currency,
-  );
-  if (matched) {
-    return matched;
-  }
-
-  if (volumeData.length === 1) {
-    return volumeData[0];
-  }
-
-  const index = currency === "USD" ? 0 : 1;
-  return volumeData[index] ?? volumeData[0] ?? null;
+export function getVolumeAmount(
+  volumeData: VolumeData,
+  currency: DashboardCurrency,
+): number {
+  return currency === "USD"
+    ? volumeData.totalVolume
+    : volumeData.totalFiatVolume;
 }
 
 export function getOrderDistributionAmount(
@@ -45,6 +37,10 @@ export function formatCurrencyAmount(
   currency: DashboardCurrency,
 ): string {
   const symbol = currency === "USD" ? "$" : "₦";
+
+  if (amount >= 1_000_000_000) {
+    return `${symbol}${(amount / 1_000_000_000).toFixed(2)}B`;
+  }
 
   if (amount >= 1_000_000) {
     return `${symbol}${(amount / 1_000_000).toFixed(2)}M`;

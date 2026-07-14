@@ -11,8 +11,8 @@ import {
   type DateRangePreset,
 } from "@/lib/features/dashboard/date_range";
 import type { DateRangeParams } from "@/lib/api/types";
-import { Add, ArrowRight } from "iconsax-reactjs";
-import { useEffect, useState } from "react";
+import { Add, ArrowRight, Calendar } from "iconsax-reactjs";
+import { useEffect, useRef, useState } from "react";
 
 type DashboardDatePickerProps = {
   isOpen: boolean;
@@ -20,6 +20,85 @@ type DashboardDatePickerProps = {
   onClose: () => void;
   onApply: (range: DateRangeParams, preset: DateRangePreset) => void;
 };
+
+type DateFieldProps = {
+  id: string;
+  label: string;
+  displayValue: string;
+  isoValue: string;
+  onDisplayChange: (value: string) => void;
+  onIsoChange: (iso: string) => void;
+};
+
+function DateField({
+  id,
+  label,
+  displayValue,
+  isoValue,
+  onDisplayChange,
+  onIsoChange,
+}: DateFieldProps) {
+  const calendarInputRef = useRef<HTMLInputElement>(null);
+
+  const openCalendar = () => {
+    const input = calendarInputRef.current;
+    if (!input) {
+      return;
+    }
+
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+        return;
+      } catch {
+        // Fall through to click() for browsers that block showPicker.
+      }
+    }
+
+    input.click();
+  };
+
+  return (
+    <div className="flex flex-col gap-[8px]">
+      <label className="text-sm font-semibold" htmlFor={id}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type="text"
+          value={displayValue}
+          placeholder="DD | MM | YY"
+          onChange={(event) => onDisplayChange(event.target.value)}
+          className="!py-[12px] !px-[14px] !pr-[42px] text-center text-sm"
+        />
+        <button
+          type="button"
+          aria-label={`Open ${label.toLowerCase()} calendar`}
+          onClick={openCalendar}
+          className="absolute right-[10px] top-1/2 flex h-[28px] w-[28px] -translate-y-1/2 items-center justify-center rounded-[8px] text-hint-text-color transition-colors hover:bg-divider-color hover:text-text-color"
+        >
+          <Calendar size={18} color="currentColor" variant="Linear" />
+        </button>
+        <input
+          ref={calendarInputRef}
+          type="date"
+          value={isoValue}
+          onChange={(event) => {
+            const nextIso = event.target.value;
+            if (!nextIso) {
+              return;
+            }
+            onIsoChange(nextIso);
+          }}
+          className="pointer-events-none absolute h-0 w-0 opacity-0"
+          tabIndex={-1}
+          aria-hidden="true"
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardDatePicker({
   isOpen,
@@ -79,6 +158,18 @@ export default function DashboardDatePicker({
       setDraftEnd(iso);
       setSelectedPreset("custom");
     }
+  };
+
+  const handleStartCalendarChange = (iso: string) => {
+    setDraftStart(iso);
+    setStartInput(isoToCustomDisplay(iso));
+    setSelectedPreset("custom");
+  };
+
+  const handleEndCalendarChange = (iso: string) => {
+    setDraftEnd(iso);
+    setEndInput(isoToCustomDisplay(iso));
+    setSelectedPreset("custom");
   };
 
   const handleReset = () => {
@@ -153,19 +244,14 @@ export default function DashboardDatePicker({
 
         <div className="mt-[24px] flex flex-col gap-[12px]">
           <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-[10px]">
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-sm font-semibold" htmlFor="dashboard-start-date">
-                Start Date
-              </label>
-              <input
-                id="dashboard-start-date"
-                type="text"
-                value={startInput}
-                placeholder="DD | MM | YY"
-                onChange={(event) => handleStartInputChange(event.target.value)}
-                className="!py-[12px] !px-[14px] text-center text-sm"
-              />
-            </div>
+            <DateField
+              id="dashboard-start-date"
+              label="Start Date"
+              displayValue={startInput}
+              isoValue={draftStart}
+              onDisplayChange={handleStartInputChange}
+              onIsoChange={handleStartCalendarChange}
+            />
 
             <ArrowRight
               size={18}
@@ -174,19 +260,14 @@ export default function DashboardDatePicker({
               variant="Linear"
             />
 
-            <div className="flex flex-col gap-[8px]">
-              <label className="text-sm font-semibold" htmlFor="dashboard-end-date">
-                End Date
-              </label>
-              <input
-                id="dashboard-end-date"
-                type="text"
-                value={endInput}
-                placeholder="DD | MM | YY"
-                onChange={(event) => handleEndInputChange(event.target.value)}
-                className="!py-[12px] !px-[14px] text-center text-sm"
-              />
-            </div>
+            <DateField
+              id="dashboard-end-date"
+              label="End Date"
+              displayValue={endInput}
+              isoValue={draftEnd}
+              onDisplayChange={handleEndInputChange}
+              onIsoChange={handleEndCalendarChange}
+            />
           </div>
         </div>
 

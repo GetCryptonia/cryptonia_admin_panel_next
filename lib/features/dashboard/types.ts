@@ -3,6 +3,7 @@ import type { DateRangeParams } from "@/lib/api/types";
 export type VolumeData = {
   currency?: string;
   totalVolume: number;
+  totalFiatVolume: number;
   numberOfTransactions: number;
   numberOfUniqueCustomers: number;
 };
