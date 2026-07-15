@@ -7,21 +7,68 @@ import type {
 } from "./types";
 import { normalizeCustomer } from "./utils";
 
+type CustomerApiRecord = Customer & { _id?: string };
+
+type SearchCustomersResponse =
+  | PaginatedCustomers
+  | CustomerApiRecord[]
+  | CustomerApiRecord;
+
+function normalizePaginatedCustomers(
+  data: SearchCustomersResponse,
+  page = 1,
+): PaginatedCustomers {
+  if (Array.isArray(data)) {
+    const customers = data.map(normalizeCustomer);
+    return {
+      customers,
+      currentPage: page,
+      totalPages: customers.length > 0 ? 1 : 0,
+      totalCustomers: customers.length,
+    };
+  }
+
+  if (data && typeof data === "object" && "customers" in data) {
+    return {
+      ...data,
+      customers: (data.customers ?? []).map(normalizeCustomer),
+      currentPage: data.currentPage ?? page,
+      totalPages: data.totalPages ?? 1,
+      totalCustomers: data.totalCustomers ?? data.customers?.length ?? 0,
+    };
+  }
+
+  const customer = normalizeCustomer(data);
+  return {
+    customers: customer.id ? [customer] : [],
+    currentPage: page,
+    totalPages: customer.id ? 1 : 0,
+    totalCustomers: customer.id ? 1 : 0,
+  };
+}
+
 export async function getCustomers(
   params?: PageParams,
 ): Promise<PaginatedCustomers> {
-  return apiRequest<PaginatedCustomers>("/admin-panel/customers", {
+  const data = await apiRequest<PaginatedCustomers>("/admin-panel/customers", {
     query: params,
   });
+
+  return normalizePaginatedCustomers(data, params?.page);
 }
 
 export async function searchCustomers(
   query: string,
   params?: PageParams,
 ): Promise<PaginatedCustomers> {
-  return apiRequest<PaginatedCustomers>("/admin-panel/customers/search", {
-    query: { query, ...params },
-  });
+  const data = await apiRequest<SearchCustomersResponse>(
+    "/admin-panel/customers/search",
+    {
+      query: { query, ...params },
+    },
+  );
+
+  return normalizePaginatedCustomers(data, params?.page);
 }
 
 export async function getCustomerDetails(

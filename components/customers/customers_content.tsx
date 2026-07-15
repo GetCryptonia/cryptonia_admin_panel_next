@@ -41,10 +41,10 @@ type CustomersContentProps = {
 };
 
 export default function CustomersContent({ initialData }: CustomersContentProps) {
-  const [customers, setCustomers] = useState(initialData.customers);
-  const [totalCustomers, setTotalCustomers] = useState(initialData.totalCustomers);
-  const [currentPage, setCurrentPage] = useState(initialData.currentPage);
-  const [totalPages, setTotalPages] = useState(initialData.totalPages);
+  const [customers, setCustomers] = useState(initialData.customers ?? []);
+  const [totalCustomers, setTotalCustomers] = useState(initialData.totalCustomers ?? 0);
+  const [currentPage, setCurrentPage] = useState(initialData.currentPage ?? 1);
+  const [totalPages, setTotalPages] = useState(initialData.totalPages ?? 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
@@ -90,10 +90,10 @@ export default function CustomersContent({ initialData }: CustomersContentProps)
         return;
       }
 
-      setCustomers(result.data.customers);
-      setTotalCustomers(result.data.totalCustomers);
-      setCurrentPage(result.data.currentPage);
-      setTotalPages(result.data.totalPages);
+      setCustomers(result.data.customers ?? []);
+      setTotalCustomers(result.data.totalCustomers ?? 0);
+      setCurrentPage(result.data.currentPage ?? 1);
+      setTotalPages(result.data.totalPages ?? 0);
       setError(null);
     });
   }, [debouncedQuery, currentPage]);
@@ -133,7 +133,7 @@ export default function CustomersContent({ initialData }: CustomersContentProps)
 
   const handleCustomerUpdated = (updatedCustomer: Customer) => {
     setCustomers((current) =>
-      current.map((customer) =>
+      (current ?? []).map((customer) =>
         customer.id === updatedCustomer.id ? updatedCustomer : customer,
       ),
     );
